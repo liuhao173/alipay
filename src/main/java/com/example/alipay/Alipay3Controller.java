@@ -40,7 +40,7 @@ public class Alipay3Controller {
         AlipayTradePrecreateModel model = new AlipayTradePrecreateModel();
         model.setOutTradeNo("666");                   //商户订单号
         model.setProductCode("FACE_TO_FACE_PAYMENT"); //销售产品码
-        model.setSubject("海贼王");                    //订单标题
+        model.setSubject("易政通商城产品");                    //订单标题
         model.setTotalAmount("100");                  //订单总金额
 
         AlipayTradePrecreateRequest request = new AlipayTradePrecreateRequest();
