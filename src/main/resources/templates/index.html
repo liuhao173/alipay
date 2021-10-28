@@ -29,16 +29,17 @@
             pay() {
                 $('#qrcode').html("");
                 let _this = this;
+                _this.paySucc = false;
                 $.ajax({
                     type: "post",
-                    //url: "http://localhost:6666/alipay/preCreate",
-                    url: "http://localhost:6666/alipay/baidu",
+                    url: "http://localhost:6666/alipay/preCreate",
+                    //url: "http://localhost:6666/alipay/baidu",
                     success: function(data){
                         _this.dialogVisible = true;
                         setTimeout(function(){
                             $('#qrcode').qrcode(data);
                         }, 500);
-                        /*
+
                         if ("WebSocket" in window) {
                             var ws = new WebSocket("ws://localhost:6666/alipay/bindingRecord");
                             ws.onopen = function() {
@@ -59,7 +60,7 @@
                         } else {
                             alert("您的浏览器不支持 WebSocket!");
                         }
-                        */
+
                     }
                 });
             }
