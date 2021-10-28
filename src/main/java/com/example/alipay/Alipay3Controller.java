@@ -17,8 +17,10 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -39,21 +41,35 @@ public class Alipay3Controller {
     @Resource
     private AlipayProperties alipayProperties;
 
-    @RequestMapping("/precreate")
-    public void precreate(HttpServletResponse response) throws Exception{
+    @Autowired
+    private WebSocket webSocket;
+
+    public String index(){
+        return "index";
+    }
+
+    @RequestMapping("/baidu")
+    @ResponseBody
+    public String baidu(HttpServletResponse response) throws Exception{
+        return "https://www.baidu.com";
+    }
+
+    @RequestMapping("/preCreate")
+    @ResponseBody
+    public String preCreate(HttpServletResponse response) throws Exception{
         AlipayTradePrecreateRequest request = new AlipayTradePrecreateRequest();
         request.setNotifyUrl(alipayProperties.getNotifyUrl());
         request.setReturnUrl(alipayProperties.getReturnUrl());
 
         /**
         AlipayTradePrecreateModel model = new AlipayTradePrecreateModel();
-        model.setOutTradeNo(OrderCodeFactory.getOrderCode(100L));
+        model.setOutTradeNo(OrderCodeFactory.getOrderCode(null));
         model.setSubject("打赏");
         model.setTotalAmount("0.01");
         request.setBizModel(model);
         */
         JSONObject bizContent = new JSONObject();
-        bizContent.put("out_trade_no", OrderCodeFactory.getOrderCode(100L));
+        bizContent.put("out_trade_no", OrderCodeFactory.getOrderCode(null));
         bizContent.put("total_amount", 0.01);
         bizContent.put("subject", "打赏");
         request.setBizContent(bizContent.toString());
@@ -61,9 +77,11 @@ public class Alipay3Controller {
         AlipayTradePrecreateResponse alipayTradePrecreateResponse = alipayClient.execute(request);
         if(alipayTradePrecreateResponse.isSuccess()){
             System.out.println("调用成功：" + JSONObject.toJSONString(alipayTradePrecreateResponse));
-            makeQRCode(alipayTradePrecreateResponse.getQrCode(), response.getOutputStream());
+            //makeQRCode(alipayTradePrecreateResponse.getQrCode(), response.getOutputStream());
+            return alipayTradePrecreateResponse.getQrCode();
         } else {
             System.out.println("调用失败");
+            return "";
         }
     }
 
@@ -107,17 +125,19 @@ public class Alipay3Controller {
     }
 
     @RequestMapping("/notify")
-    public void notify(HttpServletRequest request) throws Exception{   //trade_success状态下异步通知接口
+    public void notify(HttpServletRequest request) throws Exception{
+        System.out.println("订单支付成功后异步通知");
         if (check(request.getParameterMap())){
-            System.out.println(request.getParameter("trade_status"));
-            System.out.println("异步通知：" + Instant.now());
+            System.out.println("异步通知：" + Instant.now() + " ,trade_status=" + request.getParameter("trade_status"));
+            webSocket.sendMessage("true");
         }else {
             System.out.println("验签失败");
         }
     }
 
     @RequestMapping("/return")
-    public String returnUrl(HttpServletRequest request) throws Exception{  //订单支付成功后同步返回地址
+    public String returnUrl(HttpServletRequest request) throws Exception{
+        System.out.println("订单支付成功后同步返回地址");
         if (check(request.getParameterMap())){
             return "success";
         }else {
@@ -134,7 +154,7 @@ public class Alipay3Controller {
                 valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
             }
             params.put(name, valueStr);
-            System.out.println(name + " ==> " + valueStr);
+            //System.out.println(name + " ==> " + valueStr);
         }
         return AlipaySignature.rsaCheckV1(params, alipayProperties.getAlipayPublicKey(), alipayProperties.getCharset(), alipayProperties.getSignType());
     }
