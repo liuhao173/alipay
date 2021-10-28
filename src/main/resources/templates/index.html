@@ -27,6 +27,7 @@
         },
         methods: {
             pay() {
+                $('#qrcode').html("");
                 let _this = this;
                 $.ajax({
                     type: "post",
@@ -34,7 +35,9 @@
                     url: "http://localhost:6666/alipay/baidu",
                     success: function(data){
                         _this.dialogVisible = true;
-                        $('#qrcode').qrcode(data);
+                        setTimeout(function(){
+                            $('#qrcode').qrcode(data);
+                        }, 500);
                         /*
                         if ("WebSocket" in window) {
                             var ws = new WebSocket("ws://localhost:6666/alipay/bindingRecord");
