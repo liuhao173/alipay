@@ -200,7 +200,7 @@ public class CertUtil {
 		String dir = SDKConfig.getConfig().getValidateCertDir();
 		LogUtil.writeLog("加载验证签名证书目录==>" + dir +" 注：如果请求报文中version=5.1.0那么此验签证书目录使用不到，可以不需要设置（version=5.0.0必须设置）。");
 		if (isEmpty(dir)) {
-			LogUtil.writeErrorLog("WARN: acpsdk.validateCert.dir is empty");
+			LogUtil.writeLog("WARN: acpsdk.validateCert.dir is empty");
 			return;
 		}
 		CertificateFactory cf = null;
@@ -220,8 +220,7 @@ public class CertUtil {
 			File file = files[i];
 			try {
 				//in = new FileInputStream(file.getAbsolutePath());
-				Resource resource = new ClassPathResource("classpath:" + file.getAbsolutePath());
-				in = (FileInputStream) resource.getInputStream();
+				in = new FileInputStream(new ClassPathResource(file.getAbsolutePath()).getFile());
 				validateCert = (X509Certificate) cf.generateCertificate(in);
 				if(validateCert == null) {
 					LogUtil.writeErrorLog("Load verify cert error, " + file.getAbsolutePath() + " has error cert content.");
@@ -276,8 +275,7 @@ public class CertUtil {
 		try {
 			cf = CertificateFactory.getInstance("X.509", "BC");
 			//in = new FileInputStream(path);
-			Resource resource = new ClassPathResource("classpath:" + path);
-			in = (FileInputStream) resource.getInputStream();
+			in = new FileInputStream(new ClassPathResource(path).getFile());
 			encryptCertTemp = (X509Certificate) cf.generateCertificate(in);
 			// 打印证书加载信息,供测试阶段调试
 			LogUtil.writeLog("[" + path + "][CertId="
@@ -484,8 +482,7 @@ public class CertUtil {
 			KeyStore ks = KeyStore.getInstance(type, "BC");
 			LogUtil.writeLog("Load RSA CertPath=[" + pfxkeyfile + "],Pwd=["+ keypwd + "],type=["+type+"]");
 			//fis = new FileInputStream(pfxkeyfile);
-			Resource resource = new ClassPathResource("classpath:" + pfxkeyfile);
-			fis = (FileInputStream) resource.getInputStream();
+			fis = new FileInputStream(new ClassPathResource(pfxkeyfile).getFile());
 			char[] nPassword = null;
 			nPassword = null == keypwd || "".equals(keypwd.trim()) ? null: keypwd.toCharArray();
 			if (null != ks) {

@@ -15,7 +15,6 @@ com\liuhao\alipay\AlipayProperties.class
 com\liuhao\asppay\tools\BaseHttpSSLSocketFactory.class
 com\liuhao\asppay\tools\BaseHttpSSLSocketFactory$MyX509TrustManager.class
 com\liuhao\asppay\tools\CertUtil$CerFilter.class
-com\liuhao\asppay\constants\PayWay.class
 com\liuhao\asppay\tools\LogUtil.class
 com\liuhao\alipay\AlipayConfig.class
 com\liuhao\asppay\controller\AcyncController.class

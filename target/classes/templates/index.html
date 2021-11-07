@@ -8,6 +8,7 @@
 <body>
 <div id="app">
     <el-button type="primary" @click="pcPay">网银支付</el-button>
+    <el-button type="primary" @click="pcPay1">网银支付1</el-button>
     <el-button type="primary" @click="pay">支付</el-button>
     <el-dialog :title="paySucc?'支付成功':'扫码支付'" :visible.sync="dialogVisible" width="16%" center>
         <div id="qrcode"></div>
@@ -28,7 +29,10 @@
         },
         methods: {
             pcPay(){
-                window.open("http://localhost:6666/alipay/pcPay");
+                window.open("http://localhost:8080/alipay/pcPay");
+            },
+            pcPay1(){
+                window.open("http://localhost:8080/alipay/pcPay1");
             },
             pay() {
                 $('#qrcode').html("");
@@ -36,7 +40,7 @@
                 _this.paySucc = false;
                 $.ajax({
                     type: "post",
-                    url: "http://localhost:6666/alipay/preCreate",
+                    url: "http://localhost:8080/alipay/preCreate",
                     //url: "http://localhost:6666/alipay/baidu",
                     success: function(data){
                         _this.dialogVisible = true;

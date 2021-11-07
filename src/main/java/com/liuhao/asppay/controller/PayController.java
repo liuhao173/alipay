@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletResponse;
+
 @RestController
 public class PayController {
     
@@ -18,9 +20,16 @@ public class PayController {
      * @return
      */
     @RequestMapping(value="pcPay")
-    public String pcPay(Product product) {
+    public void pcPay(HttpServletResponse response, Product product) throws Exception {
         product.setPayWay((short)2);
-        //return payService.unionPay(product);
-        return payService.pay(product);
+        String result = payService.pay(product);
+        response.getWriter().write(result);
+    }
+
+    @RequestMapping(value="pcPay1")
+    public void pcPay1(HttpServletResponse response, Product product) throws Exception {
+        product.setPayWay((short)2);
+        String result = payService.unionPay(product);
+        response.getWriter().write(result);
     }
 }

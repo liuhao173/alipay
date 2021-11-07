@@ -5,6 +5,7 @@ import com.liuhao.asppay.tools.LogUtil;
 import com.liuhao.asppay.tools.SDKConstants;
 import com.liuhao.asppay.tools.UnionConfig;
 import org.apache.commons.io.IOUtils;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,7 +23,7 @@ import java.util.Map;
 /**
  * 银联支付异步通知
  */
-@RestController
+@Controller
 public class AcyncController{
 
     @RequestMapping(value="backRcvResponse")
@@ -54,17 +55,13 @@ public class AcyncController{
     }
 
     @RequestMapping(value="frontRcvResponse")
-    public void frontRcvResponse(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public String frontRcvResponse(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         LogUtil.writeLog("FrontRcvResponse前台接收报文返回开始");
 
         String encoding = req.getParameter(SDKConstants.param_encoding);
         LogUtil.writeLog("返回报文中encoding=[" + encoding + "]");
-        String pageResult = "";
-        if (UnionConfig.encoding.equalsIgnoreCase(encoding)) {
-            pageResult = "/utf8_result.jsp";
-        } else {
-            pageResult = "/gbk_result.jsp";
-        }
+        String pageResult = "result";
+
         Map<String, String> respParam = getAllRequestParam(req);
 
         // 打印请求报文
@@ -98,9 +95,10 @@ public class AcyncController{
             //判断respCode=00、A6后，对涉及资金类的交易，请再发起查询接口查询，确定交易成功后更新数据库。
         }
         req.setAttribute("result", page.toString());
-        req.getRequestDispatcher(pageResult).forward(req, resp);
+        //req.getRequestDispatcher(pageResult).forward(req, resp);
 
         LogUtil.writeLog("FrontRcvResponse前台接收报文返回结束");
+        return pageResult;
     }
 
     /**
