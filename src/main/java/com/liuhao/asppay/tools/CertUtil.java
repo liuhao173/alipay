@@ -1,5 +1,10 @@
 package com.liuhao.asppay.tools;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +50,9 @@ import static com.liuhao.asppay.tools.SDKUtil.isEmpty;
  * 声明：以下代码只是为了方便接入方测试而提供的样例代码，商户可以根据自己需要，按照技术文档编写。该代码仅供参考，不提供编码，性能，规范性等方面的保障
  */
 public class CertUtil {
+	@Autowired
+	ResourceLoader resourceLoader;
+
 	/** 证书容器，存储对商户请求报文签名私钥证书. */
 	private static KeyStore keyStore = null;
 	/** 敏感信息加密公钥证书 */
@@ -212,7 +220,8 @@ public class CertUtil {
 			File file = files[i];
 			try {
 				//in = new FileInputStream(file.getAbsolutePath());
-				in = (FileInputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream(file.getAbsolutePath());
+				Resource resource = new ClassPathResource("classpath:" + file.getAbsolutePath());
+				in = (FileInputStream) resource.getInputStream();
 				validateCert = (X509Certificate) cf.generateCertificate(in);
 				if(validateCert == null) {
 					LogUtil.writeErrorLog("Load verify cert error, " + file.getAbsolutePath() + " has error cert content.");
@@ -223,7 +232,7 @@ public class CertUtil {
 				// 打印证书加载信息,供测试阶段调试
 				LogUtil.writeLog("[" + file.getAbsolutePath() + "][CertId="
 						+ validateCert.getSerialNumber().toString() + "]");
-			} catch (CertificateException e) {
+			} catch (CertificateException | IOException e) {
 				LogUtil.writeErrorLog("LoadVerifyCert Error", e);
 			} finally {
 				if (null != in) {
@@ -267,7 +276,8 @@ public class CertUtil {
 		try {
 			cf = CertificateFactory.getInstance("X.509", "BC");
 			//in = new FileInputStream(path);
-			in = (FileInputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
+			Resource resource = new ClassPathResource("classpath:" + path);
+			in = (FileInputStream) resource.getInputStream();
 			encryptCertTemp = (X509Certificate) cf.generateCertificate(in);
 			// 打印证书加载信息,供测试阶段调试
 			LogUtil.writeLog("[" + path + "][CertId="
@@ -276,6 +286,8 @@ public class CertUtil {
 			LogUtil.writeErrorLog("InitCert Error", e);
 		} catch (NoSuchProviderException e) {
 			LogUtil.writeErrorLog("LoadVerifyCert Error No BC Provider", e);
+		} catch (IOException e) {
+			LogUtil.writeErrorLog("LoadVerifyCert Error File Not Found", e);
 		} finally {
 			if (null != in) {
 				try {
@@ -472,7 +484,8 @@ public class CertUtil {
 			KeyStore ks = KeyStore.getInstance(type, "BC");
 			LogUtil.writeLog("Load RSA CertPath=[" + pfxkeyfile + "],Pwd=["+ keypwd + "],type=["+type+"]");
 			//fis = new FileInputStream(pfxkeyfile);
-			fis = (FileInputStream) Thread.currentThread().getContextClassLoader().getResourceAsStream(pfxkeyfile);
+			Resource resource = new ClassPathResource("classpath:" + pfxkeyfile);
+			fis = (FileInputStream) resource.getInputStream();
 			char[] nPassword = null;
 			nPassword = null == keypwd || "".equals(keypwd.trim()) ? null: keypwd.toCharArray();
 			if (null != ks) {
