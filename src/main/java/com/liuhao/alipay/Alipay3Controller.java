@@ -1,10 +1,7 @@
-package com.example.alipay;
+package com.liuhao.alipay;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.domain.AlipayTradeCancelModel;
-import com.alipay.api.domain.AlipayTradePrecreateModel;
-import com.alipay.api.domain.AlipayTradeQueryModel;
 import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeCancelRequest;
 import com.alipay.api.request.AlipayTradePrecreateRequest;

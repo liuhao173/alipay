@@ -1,9 +1,10 @@
-package com.example.alipay;
+package com.liuhao.alipay;
 
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import javax.annotation.Resource;
 
 @Configuration

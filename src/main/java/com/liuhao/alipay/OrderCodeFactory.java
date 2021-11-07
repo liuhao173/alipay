@@ -1,4 +1,4 @@
-package com.example.alipay;
+package com.liuhao.alipay;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
