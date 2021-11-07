@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>支付宝支付</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<div id="app">
+    <el-button type="primary" @click="pcPay">网银支付</el-button>
+    <el-button type="primary" @click="pay">支付</el-button>
+    <el-dialog :title="paySucc?'支付成功':'扫码支付'" :visible.sync="dialogVisible" width="16%" center>
+        <div id="qrcode"></div>
+    </el-dialog>
+</div>
+<script src="https://unpkg.com/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery.qrcode/1.0/jquery.qrcode.min.js"></script>
+<script>
+    new Vue({
+        el:'#app',
+        data:{
+            dialogVisible: false,
+            paySucc: false
+        },
+        created: function () {
+        },
+        methods: {
+            pcPay(){
+                window.open("http://localhost:6666/alipay/pcPay");
+            },
+            pay() {
+                $('#qrcode').html("");
+                let _this = this;
+                _this.paySucc = false;
+                $.ajax({
+                    type: "post",
+                    url: "http://localhost:6666/alipay/preCreate",
+                    //url: "http://localhost:6666/alipay/baidu",
+                    success: function(data){
+                        _this.dialogVisible = true;
+                        setTimeout(function(){
+                            $('#qrcode').qrcode(data);
+                        }, 500);
+
+                        if ("WebSocket" in window) {
+                            var ws = new WebSocket("ws://localhost:6666/alipay/bindingRecord");
+                            ws.onopen = function() {
+                                ws.send("data");
+                            };
+                            ws.onmessage = function(evt) {
+                                if (Boolean(evt.data)) {
+                                    _this.paySucc = true;
+                                    setTimeout(() => {
+                                        _this.dialogVisible = false;
+                                    }, 3 * 1000);
+                                }
+                                ws.close();
+                            };
+                            ws.onclose = function() {
+                                console.log("连接已关闭...");
+                            };
+                        } else {
+                            alert("您的浏览器不支持 WebSocket!");
+                        }
+
+                    }
+                });
+            }
+        }
+    })
+</script>
+</body>
+</html>
