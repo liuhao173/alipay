@@ -2,16 +2,14 @@ package com.liuhao.asppay.service;
 
 import com.liuhao.asppay.model.Product;
 
-import java.io.UnsupportedEncodingException;
-
 public interface PayService {
     /**
      * 银联支付
      * @param product
      * @return  String
      */
-    String unionPay(Product product);
+    String unionPay(Product product) throws Exception;
 
-    String pay(Product product) throws UnsupportedEncodingException, Exception;
+    String pay(Product product) throws Exception;
 
 }
