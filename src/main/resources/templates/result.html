@@ -6,6 +6,11 @@
 </head>
 <body>
 <div>
-    [[${result}]]
+    <table border="1" cellpadding="1" th:cellspacing="1">
+        <tr th:each="p : ${respParam}">
+            <td width="30%">[[${p.key}]]</td>
+            <td>[[${p.value}]]</td>
+        </tr>
+    </table>
 </div>
 </body>

@@ -7,7 +7,6 @@ import com.liuhao.asppay.tools.UnionConfig;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -71,21 +70,23 @@ public class AcyncController{
         StringBuffer page = new StringBuffer();
         if (null != respParam && !respParam.isEmpty()) {
             Iterator<Map.Entry<String, String>> it = respParam.entrySet().iterator();
-            valideData = new HashMap<String, String>(respParam.size());
+            valideData = new HashMap<>(respParam.size());
             while (it.hasNext()) {
                 Map.Entry<String, String> e = it.next();
-                String key = (String) e.getKey();
-                String value = (String) e.getValue();
+                String key = e.getKey();
+                String value = e.getValue();
                 value = new String(value.getBytes(encoding), encoding);
-                page.append("<tr><td width=\"30%\" align=\"right\">" + key + "(" + key + ")</td><td>" + value + "</td></tr>");
+                //page.append("<tr><td width=\"30%\" align=\"right\">" + key + "(" + key + ")</td><td>" + value + "</td></tr>");
                 valideData.put(key, value);
             }
         }
         if (!AcpService.validate(valideData, encoding)) {
-            page.append("<tr><td width=\"30%\" align=\"right\">验证签名结果</td><td>失败</td></tr>");
+            //page.append("<tr><td width=\"30%\" align=\"right\">验证签名结果</td><td>失败</td></tr>");
+            valideData.put("验证签名结果", "成功");
             LogUtil.writeLog("验证签名结果[失败].");
         } else {
-            page.append("<tr><td width=\"30%\" align=\"right\">验证签名结果</td><td>成功</td></tr>");
+            //page.append("<tr><td width=\"30%\" align=\"right\">验证签名结果</td><td>成功</td></tr>");
+            valideData.put("验证签名结果", "成功");
             LogUtil.writeLog("验证签名结果[成功].");
             System.out.println(valideData.get("orderId")); //其他字段也可用类似方式获取
             String respCode = valideData.get("respCode");
@@ -94,9 +95,8 @@ public class AcyncController{
             String traceNo = valideData.get("traceNo");
         }
         LogUtil.writeLog("FrontRcvResponse前台接收报文返回结束");
-        page.insert(0, "<table border=\"1\" cellspacing=\"1\" cellpadding=\"1\">");
-        page.append("</table>");
-        req.setAttribute("result",  HtmlUtils.htmlEscape(page.toString()));
+        //req.setAttribute("result",  page.insert(0, "<table border=\"1\" cellspacing=\"1\" cellpadding=\"1\">").append("</table>").toString());
+        req.setAttribute("respParam",  respParam);
         return "result";
     }
 
