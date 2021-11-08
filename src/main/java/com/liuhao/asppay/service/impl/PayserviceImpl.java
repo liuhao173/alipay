@@ -1,5 +1,6 @@
 package com.liuhao.asppay.service.impl;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,8 +34,9 @@ public class PayserviceImpl implements PayService {
         requestData.put("currencyCode", "156");                       //交易币种（境内商户一般是156 人民币）
         requestData.put("txnAmt", "10000");                           //交易金额，单位分，不要带小数点
         //这里组织穿透数据 业务以及交易类型(使用json数据报错)
-        requestData.put("reqReserved", "自定义参数");                   //请求方保留域，如需使用请启用即可；透传字段（可以实现商户自定义参数的追踪）本交易的后台通知,对本交易的交易状态查询交易、对账文件中均会原样返回，商户可以按需上传，长度为1-1024个字节
-
+        //中文需要转码
+        //requestData.put("reqReserved", "自定义参数");                   //请求方保留域，如需使用请启用即可；透传字段（可以实现商户自定义参数的追踪）本交易的后台通知,对本交易的交易状态查询交易、对账文件中均会原样返回，商户可以按需上传，长度为1-1024个字节
+        //requestData.put("orderDesc", "机器人");
         //前台通知地址 （需设置为外网能访问 http https均可），支付成功后的页面 点击“返回商户”按钮的时候将异步通知报文post到该地址
         //如果想要实现过几秒中自动跳转回商户页面权限，需联系银联业务申请开通自动返回商户权限
         //异步通知参数详见open.unionpay.com帮助中心 下载  产品接口规范  网关支付产品接口规范 消费交易 商户通知
@@ -65,7 +67,7 @@ public class PayserviceImpl implements PayService {
     }
 
     @Override
-    public String pay(Product product) {
+    public String pay(Product product) throws Exception {
         Map<String, String> requestData = new HashMap<String, String>();
         /***银联全渠道系统，产品参数，除了encoding自行选择外其他不需修改***/
         requestData.put("version", UnionConfig.version);   			  //版本号，全渠道默认值
@@ -82,7 +84,8 @@ public class PayserviceImpl implements PayService {
         requestData.put("txnTime", UnionConfig.getCurrentTime());     //订单发送时间，取系统时间，格式为yyyyMMddHHmmss，必须取当前时间，否则会报txnTime无效
         requestData.put("currencyCode", "156");         			  //交易币种（境内商户一般是156 人民币）
         requestData.put("txnAmt", "10000");             			  //交易金额，单位分，不要带小数点
-        requestData.put("riskRateInfo", "{commodityName=测试商品名称}");
+        requestData.put("riskRateInfo", URLEncoder.encode("{commodityName=测试商品名称}", "UTF-8"));
+        requestData.put("orderDesc", URLEncoder.encode("机器人", "UTF-8"));
 
         //前台通知地址 （需设置为外网能访问 http https均可），支付成功后的页面 点击“返回商户”按钮的时候将异步通知报文post到该地址
         //如果想要实现过几秒中自动跳转回商户页面权限，需联系银联业务申请开通自动返回商户权限

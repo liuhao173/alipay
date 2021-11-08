@@ -7,7 +7,7 @@ import com.liuhao.asppay.tools.UnionConfig;
 import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.HtmlUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -39,14 +39,15 @@ public class AcyncController{
         if (!AcpService.validate(reqParam, encoding)) {
             LogUtil.writeLog("验证签名结果[失败].");
             //验签失败，需解决验签问题
-
         } else {
             LogUtil.writeLog("验证签名结果[成功].");
             //【注：为了安全验签成功才应该写商户的成功处理逻辑】交易成功，更新商户订单状态
 
-            String orderId =reqParam.get("orderId"); //获取后台通知的数据，其他字段也可用类似方式获取
+            String orderId = reqParam.get("orderId"); //获取后台通知的数据，其他字段也可用类似方式获取
             String respCode = reqParam.get("respCode");
             //判断respCode=00、A6后，对涉及资金类的交易，请再发起查询接口查询，确定交易成功后更新数据库。
+            String queryId = reqParam.get("queryId");
+            String traceNo = reqParam.get("traceNo");
 
         }
         LogUtil.writeLog("BackRcvResponse接收后台通知结束");
@@ -60,7 +61,6 @@ public class AcyncController{
 
         String encoding = req.getParameter(SDKConstants.param_encoding);
         LogUtil.writeLog("返回报文中encoding=[" + encoding + "]");
-        String pageResult = "result";
 
         Map<String, String> respParam = getAllRequestParam(req);
 
@@ -70,16 +70,14 @@ public class AcyncController{
         Map<String, String> valideData = null;
         StringBuffer page = new StringBuffer();
         if (null != respParam && !respParam.isEmpty()) {
-            Iterator<Map.Entry<String, String>> it = respParam.entrySet()
-                    .iterator();
+            Iterator<Map.Entry<String, String>> it = respParam.entrySet().iterator();
             valideData = new HashMap<String, String>(respParam.size());
             while (it.hasNext()) {
                 Map.Entry<String, String> e = it.next();
                 String key = (String) e.getKey();
                 String value = (String) e.getValue();
                 value = new String(value.getBytes(encoding), encoding);
-                page.append("<tr><td width=\"30%\" align=\"right\">" + key
-                        + "(" + key + ")</td><td>" + value + "</td></tr>");
+                page.append("<tr><td width=\"30%\" align=\"right\">" + key + "(" + key + ")</td><td>" + value + "</td></tr>");
                 valideData.put(key, value);
             }
         }
@@ -90,15 +88,16 @@ public class AcyncController{
             page.append("<tr><td width=\"30%\" align=\"right\">验证签名结果</td><td>成功</td></tr>");
             LogUtil.writeLog("验证签名结果[成功].");
             System.out.println(valideData.get("orderId")); //其他字段也可用类似方式获取
-
             String respCode = valideData.get("respCode");
             //判断respCode=00、A6后，对涉及资金类的交易，请再发起查询接口查询，确定交易成功后更新数据库。
+            String queryId = valideData.get("queryId");
+            String traceNo = valideData.get("traceNo");
         }
-        req.setAttribute("result", page.toString());
-        //req.getRequestDispatcher(pageResult).forward(req, resp);
-
         LogUtil.writeLog("FrontRcvResponse前台接收报文返回结束");
-        return pageResult;
+        page.insert(0, "<table border=\"1\" cellspacing=\"1\" cellpadding=\"1\">");
+        page.append("</table>");
+        req.setAttribute("result",  HtmlUtils.htmlEscape(page.toString()));
+        return "result";
     }
 
     /**
@@ -108,8 +107,7 @@ public class AcyncController{
      * @param request
      * @return
      */
-    public static Map<String, String> getAllRequestParam(
-            final HttpServletRequest request) {
+    public static Map<String, String> getAllRequestParam(final HttpServletRequest request) {
         Map<String, String> res = new HashMap<String, String>();
         Enumeration<?> temp = request.getParameterNames();
         if (null != temp) {
@@ -119,7 +117,6 @@ public class AcyncController{
                 res.put(en, value);
                 // 在报文上送时，如果字段的值为空，则不上送<下面的处理为在获取所有参数数据时，判断若值为空，则删除这个字段>
                 if (res.get(en) == null || "".equals(res.get(en))) {
-                    // System.out.println("======为空的字段名===="+en);
                     res.remove(en);
                 }
             }
@@ -135,8 +132,7 @@ public class AcyncController{
      * @param request
      * @return
      */
-    public static Map<String, String> getAllRequestParamStream(
-            final HttpServletRequest request) {
+    public static Map<String, String> getAllRequestParamStream(final HttpServletRequest request) {
         Map<String, String> res = new HashMap<String, String>();
         try {
             String notifyStr = new String(IOUtils.toByteArray(request.getInputStream()),UnionConfig.encoding);
